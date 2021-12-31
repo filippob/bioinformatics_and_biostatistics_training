@@ -7,9 +7,7 @@ output:
     keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ## Mixed models
 
@@ -51,7 +49,8 @@ where:
 We take data on the yield of 41 potato lines (`DT_example` dataset) from different environments (combination of location and year).
 There are *185* records.
 
-```{r mixed_model, warning=FALSE, message=FALSE}
+
+```r
 library("sommer")
 library("tidyverse")
 data(DT_example)
@@ -60,18 +59,34 @@ DT <- DT_example
 head(DT)
 ```
 
+```
+##                   Name     Env Loc Year     Block Yield    Weight
+## 33  Manistee(MSL292-A) CA.2013  CA 2013 CA.2013.1     4 -1.904711
+## 65          CO02024-9W CA.2013  CA 2013 CA.2013.1     5 -1.446958
+## 66  Manistee(MSL292-A) CA.2013  CA 2013 CA.2013.2     5 -1.516271
+## 67            MSL007-B CA.2011  CA 2011 CA.2011.2     5 -1.435510
+## 68           MSR169-8Y CA.2013  CA 2013 CA.2013.1     5 -1.469051
+## 103         AC05153-1W CA.2013  CA 2013 CA.2013.1     6 -1.307167
+```
+
 We first look at the distribution of the quantitative response variable:
 
-```{r}
+
+```r
 hist(DT$Yield, xlab = "yield", main="response variable")
 ```
+
+![](mixed_models_files/figure-html/unnamed-chunk-1-1.png)<!-- -->
 Then at the distribution of observations (yield) per environemnt:
 
-```{r}
+
+```r
 p <- ggplot(DT, aes(x = Name, y = Yield)) + geom_jitter(aes(color=Name)) + facet_wrap(~Env)
 p <- p + theme(legend.position = "none", axis.text.x = element_blank())
 p
 ```
+
+![](mixed_models_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 ### Fitting the mixed model
 
 We now fit a mixed model of the form:
@@ -80,7 +95,8 @@ $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}
 $$
 
-```{r}
+
+```r
 fit <-mmer(fixed = Yield ~ Env, 
             random= ~ Name,
             rcov= ~ units,
@@ -88,7 +104,34 @@ fit <-mmer(fixed = Yield ~ Env,
             verbose = FALSE)
 ```
 
-```{r}
+
+```r
 summary(fit)
+```
+
+```
+## ============================================================
+##          Multivariate Linear Mixed Model fit by REML         
+## **********************  sommer 4.1  ********************** 
+## ============================================================
+##          logLik      AIC      BIC Method Converge
+## Value -32.59421 71.18842 80.84949     NR     TRUE
+## ============================================================
+## Variance-Covariance components:
+##                   VarComp VarCompSE Zratio Constraint
+## Name.Yield-Yield    4.856    1.5233  3.188   Positive
+## units.Yield-Yield   8.109    0.9615  8.434   Positive
+## ============================================================
+## Fixed effects:
+##   Trait      Effect Estimate Std.Error t.value
+## 1 Yield (Intercept)   16.385    0.5849  28.012
+## 2 Yield  EnvCA.2012   -5.688    0.5741  -9.908
+## 3 Yield  EnvCA.2013   -6.218    0.6107 -10.182
+## ============================================================
+## Groups and observations:
+##      Yield
+## Name    41
+## ============================================================
+## Use the '$' sign to access results and parameters
 ```
 
