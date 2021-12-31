@@ -20,19 +20,19 @@ library("katex")
 Linear mixed models are a very powerful statistical tool that, simply put, allows to mix "fixed" (systematic) and "random" effects in one model equation:  
 
 ```{r, echo=FALSE}
-tex = "\\mathbf{y} = \\mathbf{Xb} + \\mathbf{Zu} + \\mathbf{e}"
-katex_html(
-  tex,
-  displayMode = TRUE,
-  include_css = TRUE,
-  preview = interactive()
-)
+# tex = "\\mathbf{y} = \\mathbf{Xb} + \\mathbf{Zu} + \\mathbf{e}"
+# katex_html(
+#   tex,
+#   displayMode = TRUE,
+#   include_css = TRUE,
+#   preview = interactive()
+# )
 ```
-<!--
+
 $$
 \mathbf{y} = \mathbf{Xb} + \mathbf{Zu} + \mathbf{e}
 $$
-//-->
+
 - **y**: vector of response (target) variable (observations) $(n,1)$
 - **b**: vector of fixed effects $(f,1)$
 - **u**: vector of random effects $(r,1)$
@@ -52,19 +52,19 @@ While **fixed effects** are just point estimates of an underlying *true* value, 
 The total variance of the observations (**y**'s) is partitioned into one component belonging to the random effect **u** and the residual variance:
 
 ```{r, echo=FALSE}
-tex = "Var(\\mathbf{y}) = \\mathbf{K} \\sigma_u^2 + \\mathbf{R} + \\sigma_e^2"
-katex_html(
-  tex,
-  displayMode = TRUE,
-  include_css = TRUE,
-  preview = interactive()
-)
+# tex = "Var(\\mathbf{y}) = \\mathbf{K} \\sigma_u^2 + \\mathbf{R} + \\sigma_e^2"
+# katex_html(
+#   tex,
+#   displayMode = TRUE,
+#   include_css = TRUE,
+#   preview = interactive()
+# )
 ```
-<!--
+
 $$
 Var(\mathbf{y}) = \mathbf{K} \sigma_u^2 + \mathbf{R} \sigma_e^2
 $$
-//-->
+
 where:
 
 - **K**: *covariance* (relationship) *matrix* between the observations (for the specific random effect)
