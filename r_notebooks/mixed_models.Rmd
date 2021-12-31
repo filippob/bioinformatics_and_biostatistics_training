@@ -128,16 +128,4 @@ fit <-mmer(fixed = Yield ~ Env,
 summary(fit)
 ```
 
-```{r}
-library("katex")
-tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
-katex_html(
-  tex,
-  displayMode = TRUE,
-  include_css = TRUE,
-  preview = interactive()
-)
-
-# katex_mathml(tex, displayMode = TRUE, ...)
-```
 
