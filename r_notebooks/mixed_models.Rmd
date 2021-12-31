@@ -5,20 +5,34 @@ date: "12/31/2021"
 output: 
   html_document:
     keep_md: true
+  github_document:
+    pandoc_args: ['--lua-filter', 'math-github.lua']
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library("katex")
 ```
 
 ## Mixed models
 
 Linear mixed models are a very powerful statistical tool that, simply put, allows to mix "fixed" (systematic) and "random" effects in one model equation:  
 
+```{r, echo=FALSE}
+tex = "\\mathbf{y} = \\mathbf{Xb} + \\mathbf{Zu} + \\mathbf{e}"
+katex_html(
+  tex,
+  displayMode = TRUE,
+  include_css = TRUE,
+  preview = interactive()
+)
+```
+<!--
 $$
 \mathbf{y} = \mathbf{Xb} + \mathbf{Zu} + \mathbf{e}
 $$
-
+//-->
 - **y**: vector of response (target) variable (observations) $(n,1)$
 - **b**: vector of fixed effects $(f,1)$
 - **u**: vector of random effects $(r,1)$
@@ -37,9 +51,20 @@ This is a **linear additive mixed model**:
 While **fixed effects** are just point estimates of an underlying *true* value, **random effects** are associated with a distribution and, importantly, a **variance component**. 
 The total variance of the observations (**y**'s) is partitioned into one component belonging to the random effect **u** and the residual variance:
 
+```{r, echo=FALSE}
+tex = "Var(\\mathbf{y}) = \\mathbf{K} \\sigma_u^2 + \\mathbf{R} + \\sigma_e^2"
+katex_html(
+  tex,
+  displayMode = TRUE,
+  include_css = TRUE,
+  preview = interactive()
+)
+```
+<!--
 $$
 Var(\mathbf{y}) = \mathbf{K} \sigma_u^2 + \mathbf{R} \sigma_e^2
 $$
+//-->
 where:
 
 - **K**: *covariance* (relationship) *matrix* between the observations (for the specific random effect)
@@ -76,6 +101,17 @@ p
 
 We now fit a mixed model of the form:
 
+```{r}
+tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
+katex_html(
+  tex,
+  displayMode = TRUE,
+  include_css = TRUE,
+  preview = interactive()
+)
+```
+
+
 $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}
 $$
@@ -90,5 +126,18 @@ fit <-mmer(fixed = Yield ~ Env,
 
 ```{r}
 summary(fit)
+```
+
+```{r}
+library("katex")
+tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
+katex_html(
+  tex,
+  displayMode = TRUE,
+  include_css = TRUE,
+  preview = interactive()
+)
+
+# katex_mathml(tex, displayMode = TRUE, ...)
 ```
 
