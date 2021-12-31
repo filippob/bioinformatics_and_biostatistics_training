@@ -100,20 +100,14 @@ We now fit a mixed model of the form:
 
 
 ```r
-tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
-katex_html(
-  tex,
-  displayMode = TRUE,
-  include_css = TRUE,
-  preview = interactive()
-)
+# tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
+# katex_html(
+#   tex,
+#   displayMode = TRUE,
+#   include_css = TRUE,
+#   preview = interactive()
+# )
 ```
-
-```{=html}
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.13.11/dist/katex.min.css" data-external="1">
-<span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mrow><mi mathvariant="bold">y</mi><mi mathvariant="bold">i</mi><mi mathvariant="bold">e</mi><mi mathvariant="bold">l</mi><mi mathvariant="bold">d</mi></mrow><mo>=</mo><mi mathvariant="bold">X</mi><mo>⋅</mo><mrow><mi mathvariant="bold">e</mi><mi mathvariant="bold">n</mi><mi mathvariant="bold">v</mi></mrow><mo>+</mo><mi mathvariant="bold">Z</mi><mo>⋅</mo><mrow><mi mathvariant="bold">v</mi><mi mathvariant="bold">a</mi><mi mathvariant="bold">r</mi><mi mathvariant="bold">i</mi><mi mathvariant="bold">e</mi><mi mathvariant="bold">t</mi><mi mathvariant="bold">y</mi></mrow><mo>+</mo><mi mathvariant="bold">e</mi></mrow><annotation encoding="application/x-tex">\mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathbf">yield</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord mathbf">X</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">env</span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68611em;vertical-align:0em;"></span><span class="mord mathbf">Z</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">variety</span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.44444em;vertical-align:0em;"></span><span class="mord mathbf">e</span></span></span></span></span>
-```
-
 
 $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}

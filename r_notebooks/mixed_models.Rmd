@@ -102,15 +102,14 @@ p
 We now fit a mixed model of the form:
 
 ```{r}
-tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
-katex_html(
-  tex,
-  displayMode = TRUE,
-  include_css = TRUE,
-  preview = interactive()
-)
+# tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
+# katex_html(
+#   tex,
+#   displayMode = TRUE,
+#   include_css = TRUE,
+#   preview = interactive()
+# )
 ```
-
 
 $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}
