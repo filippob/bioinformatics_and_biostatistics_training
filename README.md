@@ -1,4 +1,7 @@
 Bioninformatics & Biostatistics Training
 =======================
 
-Students from the Philippines: course presentations
+Material from courses, training and research activities.
+- notes
+- theoretical insights
+- worked out notebooks with exercises (R, Python)
