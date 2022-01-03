@@ -6,6 +6,8 @@ Material from courses, training and research activities.
 - theoretical insights
 - worked out notebooks with exercises (R, Python)
 
+### First project
+
 1. super-quick recap of linear mixed models
 2. application to genetics and breeding: from BLUP to GBLUP
 3. an alternative parameterization: the SNP-BLUP
