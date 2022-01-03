@@ -7,6 +7,7 @@ output:
     keep_md: true
   github_document:
     pandoc_args: ['--lua-filter', 'math-github.lua']
+bibliography: ../bibliography/biostatistics.bib
 ---
 
 
@@ -36,7 +37,7 @@ This is a **linear additive mixed model**:
 - *additive* because variables are summed together
 - *mixed* because (again) it mixes fixed and random effects
 
-While **fixed effects** are just point estimates of an underlying *true* value, **random effects** are associated with a distribution and, importantly, a **variance component**. 
+While **fixed effects** are just point estimates of underlying *true* values, **random effects** are associated with a distribution and, importantly, a **variance component**. 
 The total variance of the observations (**y**'s) is partitioned into one component belonging to the random effect **u** and the residual variance:
 
 
@@ -50,6 +51,7 @@ where:
 - **K**: *covariance* (relationship) *matrix* between the observations (for the specific random effect)
 - **R** is the residual covariance matrix, usually simplified to $\mathbf{I}$ (identity matrix) under the assumption of independence between residuals
 
+Estimates for the parameters in the mixed model above are obtained by solving the **mixed model equations** (MME, @henderson1950estimaton). MME are set up by expanding the equation $\left(\mathbf{X'+Z'}\right) \cdot \left(\mathbf{Xb}+ \mathbf{Zu} \right) = \left( \mathbf{X'+Z'} \right) \cdot \mathbf{y}$, and then adding to the random term **u** the corresponding covariance matrix:
 
 ### Mixed models: an illustration in R
 
@@ -153,4 +155,5 @@ summary(fit)
 ## Use the '$' sign to access results and parameters
 ```
 
+## References
 
