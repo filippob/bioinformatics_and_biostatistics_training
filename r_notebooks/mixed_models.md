@@ -53,6 +53,29 @@ where:
 
 Estimates for the parameters in the mixed model above are obtained by solving the **mixed model equations** (MME, @henderson1950estimaton). MME are set up by expanding the equation $\left(\mathbf{X'+Z'}\right) \cdot \left(\mathbf{Xb}+ \mathbf{Zu} \right) = \left( \mathbf{X'+Z'} \right) \cdot \mathbf{y}$, and then adding to the random term **u** the corresponding covariance matrix:
 
+$$
+\left[
+\begin{array}{cc}
+\mathbf{X'X} & \mathbf{X'Z} \\
+\mathbf{Z'X} & \mathbf{Z'Z} + \mathbf{K^{-1}\cdot \frac{\sigma_e^2}{\sigma_u^2}}
+\end{array}
+\right] \cdot
+\left[ 
+\begin{array}{c}
+\mathbf{b}\\
+\mathbf{u}
+\end{array}
+\right]
+= \left[
+\begin{array}{c}
+\mathbf{X'y}\\
+\mathbf{Z'y}
+\end{array}
+\right]
+$$
+
+**MMEs** are a very powerful statistical/mathematical tool, that can be extended in a very flexible way to a very large number of different (and increasingly) models (see for instance @mrode2014linear)
+
 ### Mixed models: an illustration in R
 
 We take data on the yield of 41 potato lines (`DT_example` dataset) from different environments (combination of location and year).
