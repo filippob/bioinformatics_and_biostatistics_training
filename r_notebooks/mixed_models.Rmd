@@ -122,11 +122,12 @@ p <- ggplot(DT, aes(x = Name, y = Yield)) + geom_jitter(aes(color=Name)) + facet
 p <- p + theme(legend.position = "none", axis.text.x = element_blank())
 p
 ```
+
 ### Fitting the mixed model
 
 We now fit a mixed model of the form:
 
-```{r}
+```{r, echo=FALSE}
 # tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
 # katex_html(
 #   tex,
@@ -140,17 +141,32 @@ $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}
 $$
 
+where we take the *environment* as a "fixed" systematic effect to be point-estimated, and *variety* as the random effect of the potato varieties (a proxy for a *genetic effect*, but with no specified kinship matrix).
+This model assumes one variance component for the random effect *variety* (variable `Name` in the code), and one residual variance component (`rcov = ~ units`, in the code):
+
 ```{r}
 fit <-mmer(fixed = Yield ~ Env, 
-            random= ~ Name,
-            rcov= ~ units,
-            data=DT, 
+            random = ~ Name,
+            rcov = ~ units,
+            data = DT, 
             verbose = FALSE)
 ```
 
 ```{r}
 summary(fit)
 ```
+
+```{r}
+ratio <- fit$sigmaVector[1]/fit$sigmaVector[2]
+fit$sigmaVector
+```
+
+From the object returned by the `mmer` function, we can see that the variance components are:
+
+- $\sigma_u^2$ = `r fit$sigmaVector[1]`, for the **variety** variance component
+- $\sigma_e^2$ = `r fit$sigmaVector[2]`, for the **residual** variance component
+
+This gives a ratio of `r round(ratio,3)` for the proportion of total phenotypic variance (*yield*) explained by the **variety** effect, which corresponds to **`r round(ratio,3)*100`%**.
 
 ## References
 

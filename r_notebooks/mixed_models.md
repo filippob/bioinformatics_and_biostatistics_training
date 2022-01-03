@@ -119,31 +119,26 @@ p
 ```
 
 ![](mixed_models_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
 ### Fitting the mixed model
 
 We now fit a mixed model of the form:
 
 
-```r
-# tex = "\\mathbf{yield} = \\mathbf{X} \\cdot \\mathbf{env} + \\mathbf{Z} \\cdot \\mathbf{variety} + \\mathbf{e}"
-# katex_html(
-#   tex,
-#   displayMode = TRUE,
-#   include_css = TRUE,
-#   preview = interactive()
-# )
-```
 
 $$
 \mathbf{yield} = \mathbf{X} \cdot \mathbf{env} + \mathbf{Z} \cdot \mathbf{variety} + \mathbf{e}
 $$
 
+where we take the *environment* as a "fixed" systematic effect to be point-estimated, and *variety* as the random effect of the potato varieties (a proxy for a *genetic effect*, but with no specified kinship matrix).
+This model assumes one variance component for the random effect *variety* (variable `Name` in the code), and one residual variance component (`rcov = ~ units`, in the code):
+
 
 ```r
 fit <-mmer(fixed = Yield ~ Env, 
-            random= ~ Name,
-            rcov= ~ units,
-            data=DT, 
+            random = ~ Name,
+            rcov = ~ units,
+            data = DT, 
             verbose = FALSE)
 ```
 
@@ -177,6 +172,24 @@ summary(fit)
 ## ============================================================
 ## Use the '$' sign to access results and parameters
 ```
+
+
+```r
+ratio <- fit$sigmaVector[1]/fit$sigmaVector[2]
+fit$sigmaVector
+```
+
+```
+##  Name.Yield-Yield units.Yield-Yield 
+##          4.855934          8.108636
+```
+
+From the object returned by the `mmer` function, we can see that the variance components are:
+
+- $\sigma_u^2$ = 4.8559337, for the **variety** variance component
+- $\sigma_e^2$ = 8.108636, for the **residual** variance component
+
+This gives a ratio of 0.599 for the proportion of total phenotypic variance (*yield*) explained by the **variety** effect, which corresponds to **59.9%**.
 
 ## References
 
