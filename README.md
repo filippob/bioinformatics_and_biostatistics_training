@@ -13,3 +13,13 @@ Material from courses, training and research activities.
 3. an alternative parameterization: the SNP-BLUP
 4. how to do cross-validation with SNP-BLUP
 5. how to do cross-validation with GBLUP
+
+### Course "Introduction to animal breeding" - University of Pisa (1st year BSc)
+
+1. basic statistics
+2. matrix algebra recap (super-quick)
+3. general introduction to animal breeding
+4. heritability estimation
+5. pedigree and kinship matrices
+6. mixed models
+7. enter genomics
