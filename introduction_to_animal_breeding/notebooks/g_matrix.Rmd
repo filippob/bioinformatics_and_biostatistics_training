@@ -1,0 +1,131 @@
+---
+title: "G matrix"
+author: "Filippo"
+date: "2023-03-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("sommer")
+library("data.table")
+```
+
+## Genomic relationship matrix
+
+With genomic data we can directly measure genetic relatedness, not only indirectly as we did previously from pedigree data (average relationships):
+
+```{r marker_data}
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
+
+mrkrs[1:12,1:12]
+```
+
+```{r}
+mat <- as.matrix(mrkrs[,-c(1:6)])
+```
+
+```{r support_function}
+rescale <- function(x,newMin,newMax) {
+
+  oldMax <-max(x);
+  oldMin <-min(x);
+  return((((newMax-newMin)*(x-oldMin))/(oldMax-oldMin))+newMin)
+}
+
+```
+
+```{r van_raden, echo=FALSE}
+#' Function calculate genomic relationship matrix à la Van Raden
+#'
+#' This function allows you to set up the G-matrix à la Van Raden
+#' @param M: n x m matrix of 0/1/2 coded SNP genotypes
+#' @keywords g-matrix, van Raden
+#' @export
+#' @examples
+#' gVanRaden(matrix(sample(c(0,1,2),200,replace=TRUE), nrow=10))
+gVanRaden <- function(M) {
+
+	# COMPUTE ALLELE FREQUENCIES
+	p = colSums(M) / (nrow(M)*2)
+	p.scaled = 2 * (p - 0.5)
+
+	## BUILD MATRIX OF GENOMIC RELATIONSHIPS
+	M <- as.matrix((M-1))-matrix(rep(p.scaled,nrow(M)),nrow=nrow(M),byrow=TRUE)
+
+	GVR<-tcrossprod(M)/(2*sum(p*(1-p)));
+
+	GVR <- rescale(GVR,0,2);
+	return(GVR)
+}
+```
+
+```{r astle_balding}
+#' Function calculate genomic relationship matrix à la Astle & Balding (2009)
+#' !!For data.table data structures!!
+#'
+#' This function allows you to set up the G-matrix à la Astle & Balding (2009)
+#' @param M: n x m matrix of 0/1/2 coded SNP genotypes
+#' @keywords g-matrix, Astle & Balding
+#' @export
+#' @examples
+#' gAstleBalding(matrix(sample(c(0,1,2),200,replace=TRUE), nrow=10))
+gAstleBalding <- function(M) {
+
+  # COMPUTE ALLELE FREQUENCIES
+  #first instance of p is allele frequency from data
+  p_hat = colSums(M) / (nrow(M)*2)
+
+  #we remove markers that never change, since they bring
+  #no information
+  M = M[,(p_hat!=0) & (p_hat!=1),with=FALSE]
+
+  #and update p_hat again for dimensionality
+  p_hat = colSums(M) / (nrow(M)*2)
+
+  #handy variables. for clarity
+  samples_cnt = nrow(M)
+  markers_cnt = ncol(M) #this is called L in the paper
+
+  ##### COMPUTING K #####
+  #this denominator is standard over all markers
+  den = 4*p_hat*(1-p_hat)
+  #making room for the new kinship matrix
+  K_hat = matrix(0, nrow=samples_cnt, ncol=samples_cnt)
+
+  #correcting data for allele frequency, it is equivalent
+  #to subtracting, for each column, the corresponding element
+  #of p_hat (adjusted for ploidy)
+  M = sweep(M, MARGIN=2, 2*p_hat)
+
+  #for each marker contribution
+  for (l in 1:markers_cnt){
+    num = M[,l] %*% t(M[,l])
+    K_hat = K_hat + num / den[l]
+  }
+
+  #average on L
+  K_hat = K_hat / markers_cnt
+
+	# library("scales")
+	GAB <- rescale(K_hat,0,2);
+
+	return(GAB)
+}
+```
+
+```{r}
+K <- gVanRaden(mat)
+```
+
+```{r}
+heatmap(K,col=rev(heat.colors(75)))
+```
+
+### Exercise: your turn!
+
+Calculate the Astle & Balding kinship matrix between the 48 Braque Français dogs in the example dataset:
+
+```{r}
+## your code here
+```
