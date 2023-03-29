@@ -20,13 +20,51 @@ data(DT_example)
 
 ## Estimate heritability
 
+#### The `sommer` R package
+
+In this notebook, we use the `sommer` *R* package to estimate variance components. The `sommer::mmer` solves the MME (mixed model equations).
+
+The multivariate (and by extension the univariate) mixed model has the form:
+
+$$
+Y = X\beta + ZU + e
+$$
+
+-   $Y$: vector (matrix) of phenotypes
+-   $X\beta$: systematic part of the mixed model
+-   $ZU$: random part of the mixed model (e.g. genetic effects)
+-   $e$: residuals
+
+Below the related variance structure ($X\beta$ is the mean, $V$ is the variance-covariance matrix):
+
+$$
+Y \sim MVN(X\beta, V)
+$$
+
+$$
+V = 
+\begin{bmatrix}
+Z_1K\sigma_{g1}^2Z'_i + H\sigma_{e1}^2 & \ldots & Z_1K\sigma_{g1,t}Z'_t + H\sigma_{e1,t} \\
+\vdots & \ddots & \vdots \\
+Z_1K\sigma_{g1,t}Z'_t + H\sigma_{e1,t} & \ldots & Z_tK\sigma_{gt,t}^2Z'_t + H\sigma_{et,t}^2
+\end{bmatrix}
+$$
+
+where $i = 1 \ldots t$ indicates the number of traits, $K$ is the covariance matrix (kinship) for the $k_{th}$ random effect, and $H=I$ is an identity (or partial identity) matrix for the residual term.
+
+`sommer` provides kernels to estimate additive (A.mat), dominance (D.mat), and epistatic (E.mat) relationship matrices.
+
+**Heritability** is one of the most popular parameters among the breeding and genetics communities because of the insight it provides in the inheritance of the trait and potential selection response.
+Heritability is usually estimated as narrow sense ($h^2$; only additive variance in the numerator $σ^2_A$), and broad sense ($H^2$; all genetic variance in the numerator $σ^2_G$).
+
+### Illustration
+
 We first use a built-in example dataset: 41 potato lines evaluated in 3 environments in an RCBD design
 
 ```{r example}
 dt_2013 = DT_example |>
   filter(Block == "CA.2013.1")
 ```
-
 
 We need to subset the relationship matrix to make it match the data subset we are using (one year):
 
@@ -46,9 +84,13 @@ res = mmer(Weight ~ 1,
            data = dt_2013)
 ```
 
+The **variance components**:
+
 ```{r varcomp}
 summary(res)$varcomp
 ```
+
+And the **estimated heritability** ($h^2$):
 
 ```{r}
 vpredict(res, h2 ~ (V1)/(V1+V2))
@@ -56,10 +98,11 @@ vpredict(res, h2 ~ (V1)/(V1+V2))
 
 ### Dog data
 
+We now use real data from a dog population (Braque Français):
+
 ```{r}
 phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
 ```
-
 
 ```{r}
 ped <- fread(file.path(base_folder, "data/pedigree.txt"))
@@ -69,22 +112,29 @@ makeA(ped, animals)
 A <- read.table("A.txt",header=FALSE)
 ```
 
+We need to transform the kinship matrix from the long format to a symmetric matrix:
+
 ```{r}
 triA <- A |>
   spread(key = "V2", value = "V3") |>
-  select(-V1)
+  dplyr::select(-V1)
 
 tA = t(triA)
 triA[upper.tri(triA)] <- tA[upper.tri(tA)]
 ```
 
+Now we ensure correspondance between the phenotype data and the kinship matrix:
 
 ```{r example}
 vec <- ped$dog_id %in% phenotypes$id
 A <- as.matrix(triA[vec,vec])
 colnames(A) <- phenotypes$id
 rownames(A) <- phenotypes$id
+```
 
+And we are ready to go to estimate heritability for one of the traits in the phenotypic dataset (we pick *game*):
+
+```{r}
 res = mmer(game ~ 1,
            random = ~vsr(id, Gu=A),
            rcov = ~units,
@@ -92,10 +142,23 @@ res = mmer(game ~ 1,
            data = phenotypes)
 ```
 
+The **variance components**:
+
 ```{r varcomp}
 summary(res)$varcomp
 ```
 
+And the estimated heritability:
+
 ```{r}
 vpredict(res, h2 ~ (V1)/(V1+V2))
 ```
+
+### Exercise
+
+Now it's your turn to pick another trait from the file of phenotypes and estimate the heritability:
+
+```{r}
+## your code here
+```
+
