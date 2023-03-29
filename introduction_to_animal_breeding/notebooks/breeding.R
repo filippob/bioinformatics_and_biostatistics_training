@@ -1,11 +1,11 @@
-################################################
-##Esercizi corso animal breeding di base   ##
-################################################
+####################################################
+## Practicals: general intro to animal breeding   ##
+####################################################
 
 library("tidyverse")
 library("data.table")
 
-## Combinazioni ##
+## Combinations ##
 
 n = 10
 k = (n/2)
@@ -52,8 +52,8 @@ sqrt(h2)
 ##########################################
 
 ### PARENT MIDPOINT (example from the slides)
-
-weight <- fread("data/weights.csv")
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+weight <- fread(file.path(base_folder, "data/weights.csv"))
 
 x = weight$`parent mid-point`
 y = weight$kid_kg
@@ -89,7 +89,7 @@ se
 
 ### Another dataset #####
 ## height
-height <- fread(file="data/height.csv")
+height <- fread(file=file.path(base_folder, "data/height.csv"))
 
 # midParent #
 x = NULL
