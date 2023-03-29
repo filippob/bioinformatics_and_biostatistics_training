@@ -53,3 +53,6 @@ rsconnect/
 *.html
 *.pdf
 
+# introduction to animal breeding
+introduction_to_animal_breeding/*/*.pdf
+introduction_to_animal_breeding/*/A.txt
