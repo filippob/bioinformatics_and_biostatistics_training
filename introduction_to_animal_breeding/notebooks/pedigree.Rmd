@@ -153,7 +153,7 @@ p <- p +  scale_fill_gradient2(low = "white",
 p <- p + guides(fill=guide_legend(title="A"))
 print(p)
 
-# ggsave(plot = p, device = "pdf", filename = "matrix_A.pdf", width = 10, height = 10)
+ggsave(plot = p, device = "pdf", filename = "matrix_A.pdf", width = 10, height = 10)
 ```
 
 ```{r}

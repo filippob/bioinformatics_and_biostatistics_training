@@ -1,0 +1,101 @@
+---
+title: "Heritability"
+author: "Filippo"
+date: "2023-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+
+library("sommer")
+library("pedigree")
+library("tidyverse")
+library("data.table")
+
+data(DT_example)
+```
+
+## Estimate heritability
+
+We first use a built-in example dataset: 41 potato lines evaluated in 3 environments in an RCBD design
+
+```{r example}
+dt_2013 = DT_example |>
+  filter(Block == "CA.2013.1")
+```
+
+
+We need to subset the relationship matrix to make it match the data subset we are using (one year):
+
+```{r}
+vec <- colnames(A_example) %in% dt_2013$Name
+A <- A_example[vec,vec]
+dt_2013$Name <- as.character(dt_2013$Name)
+```
+
+Now we can run the estimation of variance components:
+
+```{r}
+res = mmer(Weight ~ 1,
+           random = ~vsr(Name, Gu=A),
+           rcov = ~units,
+           nIters = 10,
+           data = dt_2013)
+```
+
+```{r varcomp}
+summary(res)$varcomp
+```
+
+```{r}
+vpredict(res, h2 ~ (V1)/(V1+V2))
+```
+
+### Dog data
+
+```{r}
+phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
+```
+
+
+```{r}
+ped <- fread(file.path(base_folder, "data/pedigree.txt"))
+
+animals <- rep(TRUE,nrow(ped))
+makeA(ped, animals)
+A <- read.table("A.txt",header=FALSE)
+```
+
+```{r}
+triA <- A |>
+  spread(key = "V2", value = "V3") |>
+  select(-V1)
+
+tA = t(triA)
+triA[upper.tri(triA)] <- tA[upper.tri(tA)]
+```
+
+
+```{r example}
+vec <- ped$dog_id %in% phenotypes$id
+A <- as.matrix(triA[vec,vec])
+colnames(A) <- phenotypes$id
+rownames(A) <- phenotypes$id
+
+res = mmer(game ~ 1,
+           random = ~vsr(id, Gu=A),
+           rcov = ~units,
+           nIters = 10,
+           data = phenotypes)
+```
+
+```{r varcomp}
+summary(res)$varcomp
+```
+
+```{r}
+vpredict(res, h2 ~ (V1)/(V1+V2))
+```
