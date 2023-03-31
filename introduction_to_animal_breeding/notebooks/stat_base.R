@@ -13,14 +13,15 @@ head(ChickWeight)
 plot(ChickWeight$Time, ChickWeight$weight)
 
 with(ChickWeight,
-	plot(Time, weight, xlab="days", ylab="body weight", main="Chick weight over time", pch=15, col="blue")
-);
+	plot(Time, weight, xlab="days", ylab="body weight", 
+	     main="Chick weight over time", pch=15, col="blue")
+)
 
 # add interpolation
 chick.fit <- lm(weight ~ Time, data = ChickWeight)
 abline(chick.fit)
 
-hist(ChickWeight$weight, breaks = 10) 	# function hist for numeric data
+hist(ChickWeight$weight, breaks = 15) 	# function hist for numeric data
 
 diets <- table(ChickWeight$Diet)
 barplot(diets)		# barplot for factors/characters/table output
@@ -35,7 +36,8 @@ barplot(diets,    # apply the hist function
 data("esoph")
 head(esoph)
 
-ggplot(esoph, aes(x = alcgp)) + geom_bar(aes(fill=tobgp), position = "stack")
+ggplot(esoph, aes(x = alcgp)) +
+  geom_bar(aes(fill=tobgp), position = "stack")
 ggplot(esoph, aes(x = alcgp)) + geom_bar(aes(fill=tobgp), position = "dodge")
 
 ggplot(esoph, aes(x = alcgp, y = ncases)) + geom_jitter(aes(color=alcgp))
@@ -87,7 +89,7 @@ d2 <- esoph |>
 dd <- d1 |> bind_rows(d2)
 
 p <- ggplot(dd, aes(x = consumption, y = avg, group=1)) + geom_point()
-p <- p + geom_line()
+p <- p + geom_line(aes(color = risk_factor))
 p <- p + facet_wrap(~risk_factor)
 p <- p + ylab("n. of cases")
 p <- p + theme(axis.text.x = element_text(angle = 90))
@@ -183,7 +185,11 @@ gmean <- function(v) {
 # median
 bw = ChickWeight$weight
 ordered_weight = sort(bw)
+ind1 = length(ordered_weight)/2
+sum(ordered_weight[ind1] + ordered_weight[ind1+1])/2
+
 median(ordered_weight)
+median(bw)
 
 ### #odd sequences
 temp = sample(x = bw, size = 333)
@@ -226,8 +232,9 @@ boxplot(
 abs(sort(-table(ChickWeight$weight)))	#not mode(), but table()
 abs(sort(-table(ChickWeight$weight)))[1]	
 
+ggplot(ChickWeight, aes(weight)) + geom_boxplot(color="orange")
+
 ## READ EXTERNAL FILES 
-library("here")
 library("data.table")
 
 base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
@@ -302,8 +309,8 @@ b = 100
 
 scala <- function(x,a,b) { 
 
-	massimo<-max(x);
-	minimo<-min(x);
+	massimo = max(x)
+	minimo = min(x)
 
 	return((((b-a)*(x-minimo))/(massimo-minimo))+a)
 }
