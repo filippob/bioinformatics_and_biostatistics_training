@@ -27,3 +27,7 @@ Material from courses, training and research activities.
 9. genomic inbreeding
 10. multiple trait models and genetic correlations
 11. selection index theory
+
+### Resources
+
+- R : [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN)
