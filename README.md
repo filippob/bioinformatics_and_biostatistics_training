@@ -23,3 +23,7 @@ Material from courses, training and research activities.
 5. pedigree and kinship matrices
 6. mixed models
 7. enter genomics
+8. runs of homozygosity (ROH)
+9. genomic inbreeding
+10. multiple trait models and genetic correlations
+11. selection index theory
