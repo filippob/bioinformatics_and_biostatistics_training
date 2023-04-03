@@ -235,15 +235,15 @@ abs(sort(-table(ChickWeight$weight)))[1]
 ggplot(ChickWeight, aes(weight)) + geom_boxplot(color="orange")
 
 ## READ EXTERNAL FILES 
-library("data.table")
+# library("data.table")
 
-base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
-data_url = "https://zenodo.org/record/7056828/files/milk_records.gz" 
-outfile = file.path(base_folder,"data/milk_records.gz")
-system2("wget", paste(data_url, "-O", outfile))
-milk = fread(outfile)
-
-head(milk)
+# base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+# data_url = "https://zenodo.org/record/7056828/files/milk_records.gz" 
+# outfile = file.path(base_folder,"data/milk_records.gz")
+# system2("wget", paste(data_url, "-O", outfile))
+# milk = fread(outfile)
+# 
+# head(milk)
 
 ### EXERCISE
 ### Calculate mean, median, mode for yield_tot, SCC and DSCC
@@ -253,16 +253,16 @@ head(milk)
 
 #trend
 
-as.Date(milk$calving_date, format = "%Y-%m-%d")
-milk$year <- format(milk$calving_date, format = "%Y")
-
-dd <- milk |>
-  mutate(year = factor(year)) |>
-  filter(!is.na(year)) |>
-  group_by(year, breed) |>
-  summarise(avg_scc = mean(SCC))
-
-ggplot(dd, aes(year, avg_scc, group=breed)) + geom_line(aes(color = breed)) + xlab("Year") + ylab("SCC")
+# as.Date(milk$calving_date, format = "%Y-%m-%d")
+# milk$year <- format(milk$calving_date, format = "%Y")
+# 
+# dd <- milk |>
+#   mutate(year = factor(year)) |>
+#   filter(!is.na(year)) |>
+#   group_by(year, breed) |>
+#   summarise(avg_scc = mean(SCC))
+# 
+# ggplot(dd, aes(year, avg_scc, group=breed)) + geom_line(aes(color = breed)) + xlab("Year") + ylab("SCC")
 
 
 ##############################
@@ -273,11 +273,14 @@ ggplot(dd, aes(year, avg_scc, group=breed)) + geom_line(aes(color = breed)) + xl
 bw1 = c(72,76,74)
 bw2 = c(59,92,71)
 
+## exercise: calculate mean and range
+
 #same range, different dispersion
 ab1 <- c(1.5,7.0,7.0,7.0,7.0,7.0,7.0,7.0)
 ab2 <- c(1.5,4.0,4.8,5.5,6.0,6.5,6.6,7.0)
 ab3 <- c(1.5,2.3,2.2,1.7,3.5,3.0,3.1,7.0)
 
+## exercise: calculate range and dispersion
 
 # variance and standard dev
 var(ChickWeight$weight)
@@ -290,19 +293,18 @@ lines(density(rnorm(50000,0,5)))
 lines(density(rnorm(50000,0,2)))
 lines(density(rnorm(50000,0,1)))
 
-
 #standardization
-round(rnorm(1,6,3),1) # R course at UniPi
-round(rnorm(1,8.5,1.5),1) # R course at Stanford University
+round(rnorm(n = 1 ,mean = 6, sd = 3),1) # R course at UniPi
+round(rnorm(n = 1, mean = 8.5, sd = 1.5),1) # R course at Stanford University
 
 # is 7 at UinPi more or less worth than 8.5 at Stanford?
 zunip = (7-6)/3;	
 zstanf = (8-8.5)/1.5;
 
 #changing scale
-summary(milk$SCC)
-massimo = max(milk$SCC)
-minimo = min(min$SCC)
+summary(ChickWeight$weight)
+massimo = max(ChickWeight$weight)
+minimo = min(ChickWeight$weight)
 
 a = 1
 b = 100
@@ -315,23 +317,25 @@ scala <- function(x,a,b) {
 	return((((b-a)*(x-minimo))/(massimo-minimo))+a)
 }
 
-rescaled_scc = scala(milk$SCC, a, b)
-summary(rescaled_scc)
+rescaled_wt = scala(ChickWeight$weight, a, b)
+summary(rescaled_wt)
 
 ### the scale function
-scale(x = milk$SCC, center = FALSE, scale = TRUE)
+scale(x = ChickWeight$weight, center = FALSE, scale = TRUE)
 
 ##########################
 # coefficient of variation
 
 sd(ChickWeight$weight)/mean(ChickWeight$weight)
-sd(milk$SCC)/mean(milk$SCC)
+# sd(milk$SCC)/mean(milk$SCC)
 
 cv <- function(vect) {
 
 	cv = sd(vect)/mean(vect)
 	return(cv)
 }
+
+cv(ChickWeight$weight)
 
 # covariance
 years = c(3,4,4,2,5,3,4,5,3,2)
@@ -353,7 +357,10 @@ cor(ChickWeight$weight,ChickWeight$Time)
 cor(milk$SCC, milk$DSCC)
 
 
+## READ EXTERNAL FILES 
+library("data.table")
 #### read dog data
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
 dogs <- fread(file.path(base_folder, "data/pheno.dat"))
 head(dogs)
 
@@ -395,7 +402,7 @@ sstr = n*(
 	(mean(Fert1)-GrandMean)^2+
 	(mean(Fert2)-GrandMean)^2+
 	(mean(Fert3)-GrandMean)^2
-);
+)
 
 sse = sum((Fert1-mean(Fert1))^2,(Fert2-mean(Fert2))^2,(Fert3-mean(Fert3))^2);
 
@@ -406,6 +413,14 @@ df2 = k*(n-1);
 
 mstr = sstr/df1
 mse = sse/df2
+
+## variance due to tratment 
+print(mstr)
+print(paste("The treatment accounts for", round(100*(mstr/(mstr+mse)),2), "% of the total variability"))
+
+## residual variance  
+print(mse)
+print(paste("The residual variance accounts for", round(100*(mse/(mstr+mse)),2), "% of the total variability"))
 
 Fstat = mstr/mse
 
@@ -420,13 +435,13 @@ cbind(
  seq(length(Fert1)*k),
  c(rep("F1",times=n),rep("F2",times=n),rep("F3",times=n)),
  c(Fert1, Fert2, Fert3))
-);
+)
 
-names(fertilizers)<-c("ID","FERT","YIELD");
+names(fertilizers)<-c("ID","FERT","YIELD")
 fertilizers <- mutate(fertilizers, YIELD = as.numeric(YIELD))
 
-g <- lm(YIELD ~ FERT, data=fertilizers);
-anova(g);
+g <- lm(YIELD ~ FERT, data=fertilizers)
+anova(g)
 
 
 ################################

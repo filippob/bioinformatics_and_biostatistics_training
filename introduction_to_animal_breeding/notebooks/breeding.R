@@ -99,10 +99,48 @@ y = NULL
 ## 2. plot the data and the fitted curve from linear regression
 ## 3. obtain the standard error of the heritability
 
+## ù############################ ##
+## VARIANCE COMPONENTS FROM ANOVA #
+## ############################# ##
 
+## half-sib model (example with natural antibody titres)
+titres = fread(file.path(base_folder, "data/antibody_titres.csv"))
+titres <- titres |> rename(antibodies = `natural antibody titre (u/ml)`)
 
+g <- lm(antibodies ~ sire, data = titres)
+anova(g)
 
+ms <- anova(g)
+ms_sire = ms$`Mean Sq`[1] ## sigma_e + J*sigma_s
+ms_residual = ms$`Mean Sq`[2] ## sigma_e
+J = group_by(titres, sire) |> summarise(N = n()) |> summarise(avg_n = mean(N)) |> pull(avg_n)
 
+sigma_e = ms_residual
+sigma_s = (ms_sire - sigma_e) / J
 
+## we now have the sire and residual variances
 
+h2 = (4*sigma_s)/(sigma_s + sigma_e)
+print(h2)
 
+## EXERCISE ###
+## with the following data, estimate h2 from the analysis of variance
+
+#### dog breeds: seconds/400 meters
+breed1 <- c(58,56,52,55,62)
+breed2 <- c(60,62,68,70,68)
+breed3 <- c(61,58,55,64,70)
+
+k = 3
+n = 4
+
+breeds <- as.data.frame(
+  cbind(
+    seq(length(breed1)*k),
+    c(rep("B1",times=n),rep("B2",times=n),rep("B3",times=n)),
+    c(breed1, breed2, breed3))
+)
+
+names(breeds) <- c("dog", "breed", "speed")
+
+## your code here
