@@ -6,9 +6,11 @@ library("tidyverse")
 library("data.table")
 
 ## Combinations ##
+## Mendelian sampling: each descendant receives a different 50% of the parental (sire/dam) genes (random samples)
+## brain teaser: how many possible 50% combinations with 10 genes?
 
 n = 10
-k = (n/2)
+k = (n/2) ## 50%
 
 factorial(n)/(factorial(k)*factorial(n-k))
 
@@ -73,10 +75,18 @@ plot(x,y,type="p",main="Parent-offspring regression",xlab="Average weight of par
 abline(g)
 
 
-# standard error
-# sqrt(SSE/(n-(1+k)))
-# k = number of coefficients estimated (except the intercept)
-# divided by the square root of the sum of the square of that particular x variable deviates from the mean
+####################################
+### standard error of coefficients
+### from: https://www.learnbymarketing.com/tutorials/explaining-the-lm-summary-in-r
+####################################
+    # is the Residual Standard Error divided by the square root of the sum of 
+    # the square of that particular x variable.
+## Residual Standard Error: sqrt(SSE/(n-(1+k)))
+    # n = sample size
+    # k = number of coefficients estimated (except the intercept)
+# square root of the sum of the square of that particular x variable deviates 
+    # from the mean: sqrt(sum((x-mean(x))^2))
+
 n = length(g$residuals)
 k = 1 ## parent-offspring regression coefficient
 num = sqrt(sum(g$residuals^2))
@@ -87,6 +97,7 @@ se <- num/(common_denom*specific_denom)
 se
 
 
+#########################
 ### Another dataset #####
 ## height
 height <- fread(file=file.path(base_folder, "data/height.csv"))

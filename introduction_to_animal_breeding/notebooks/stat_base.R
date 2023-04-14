@@ -285,6 +285,7 @@ ab3 <- c(1.5,2.3,2.2,1.7,3.5,3.0,3.1,7.0)
 # variance and standard dev
 var(ChickWeight$weight)
 sd(ChickWeight$weight)
+sqrt(var(ChickWeight$weight))
 
 #draw gaussians with different sigmas
 plot(density(rnorm(50000,0,10)),type="l",ylim = c(0,0.5))
@@ -300,6 +301,11 @@ round(rnorm(n = 1, mean = 8.5, sd = 1.5),1) # R course at Stanford University
 # is 7 at UinPi more or less worth than 8.5 at Stanford?
 zunip = (7-6)/3;	
 zstanf = (8-8.5)/1.5;
+
+print(zunip)
+print(zstanf)
+
+## YOUR ANSWER ?
 
 #changing scale
 summary(ChickWeight$weight)
@@ -320,8 +326,12 @@ scala <- function(x,a,b) {
 rescaled_wt = scala(ChickWeight$weight, a, b)
 summary(rescaled_wt)
 
+plot(density(ChickWeight$weight))
+plot(density(rescaled_wt))
+
 ### the scale function
-scale(x = ChickWeight$weight, center = FALSE, scale = TRUE)
+centered_wt = scale(x = ChickWeight$weight, center = FALSE, scale = TRUE)
+plot(density(centered_wt))
 
 ##########################
 # coefficient of variation
@@ -354,7 +364,7 @@ cov(years,grade)/(sd(years)*sd(grade))
 cor(years,grade)
 
 cor(ChickWeight$weight,ChickWeight$Time)
-cor(milk$SCC, milk$DSCC)
+#cor(milk$SCC, milk$DSCC)
 
 
 ## READ EXTERNAL FILES 
