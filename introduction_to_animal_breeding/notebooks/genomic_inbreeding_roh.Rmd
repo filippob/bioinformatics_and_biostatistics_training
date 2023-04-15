@@ -1,0 +1,77 @@
+---
+title: "Genomic inbreeding & ROH"
+author: "Filippo"
+date: "2023-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("data.table")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r marker_data}
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
+
+mrkrs[1:12,1:12]
+```
+
+## $F_{HOM}$
+
+F coefficient estimates (i.e. (<observed hom. count> - <expected count>) / (<total observations> - <expected count>))
+
+- $(p+q)^2$: $p^2$, $q^2$, $2pq$
+
+
+```{r}
+mat <- as.matrix(mrkrs[,-c(1:6)])
+```
+
+```{r}
+nsnps = ncol(mat)
+```
+
+
+```{r}
+aa = rowSums(mat == 0)
+ab = rowSums(mat == 1)
+bb = rowSums(mat == 2)
+```
+
+```{r}
+tot <- aa+ab+bb
+mean(tot) == ncol(mat) ## sanity check
+```
+
+```{r}
+sd(tot) ## further sanity check (checks to zero)
+```
+
+```{r}
+p = (2*aa+ab)/(2*nsnps)
+q = 1-p
+```
+
+
+```{r}
+obs_hom = rowSums(mat != 1)
+obs_het = rowSums(mat == 1)
+exp_het = nsnps*(2*p*q)
+exp_hom = nsnps-exp_het
+```
+
+```{r}
+f_hom = (obs_hom - exp_hom)/(nsnps-exp_hom)
+```
+Or, equivalently:
+
+```{r}
+f_is = 1-obs_het/exp_het
+```
+
