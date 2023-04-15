@@ -54,8 +54,7 @@ where $i = 1 \ldots t$ indicates the number of traits, $K$ is the covariance mat
 
 `sommer` provides kernels to estimate additive (A.mat), dominance (D.mat), and epistatic (E.mat) relationship matrices.
 
-**Heritability** is one of the most popular parameters among the breeding and genetics communities because of the insight it provides in the inheritance of the trait and potential selection response.
-Heritability is usually estimated as narrow sense ($h^2$; only additive variance in the numerator $σ^2_A$), and broad sense ($H^2$; all genetic variance in the numerator $σ^2_G$).
+**Heritability** is one of the most popular parameters among the breeding and genetics communities because of the insight it provides in the inheritance of the trait and potential selection response. Heritability is usually estimated as narrow sense ($h^2$; only additive variance in the numerator $σ^2_A$), and broad sense ($H^2$; all genetic variance in the numerator $σ^2_G$).
 
 ### Illustration
 
@@ -161,4 +160,3 @@ Now it's your turn to pick another trait from the file of phenotypes and estimat
 ```{r}
 ## your code here
 ```
-

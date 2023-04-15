@@ -22,8 +22,11 @@ We use pedigree data on a small sample from a dog breed (Braque Français):⎄
 base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
 ped <- fread(file.path(base_folder, "data/pedigree.txt"))
 
-head(ped)
-dim(ped)
+head(ped) |> kable()
+```
+
+```{r}
+print(dim(ped))
 ```
 
 ### Pedigree genetic relationship matrix
@@ -85,10 +88,16 @@ A <- read.table("A.txt",header=FALSE)
 kable(head(A)) # A matrix (long format)
 ```
 
+Let's look at the diagonal elements: what can we say?
+
 ```{r}
 A %>%
   filter(V1==V2) %>%
-  summarize(mean(V3),sd(V3),min(V3),max(V3)) |>
+  summarize(avg = mean(V3), 
+            std = sd(V3),
+            min = min(V3),
+            max = max(V3)) |>
+  gather(key = "statistic", value = "value") |>
   kable()
 ```
 
@@ -96,7 +105,12 @@ A %>%
 A %>%
   filter(V1==V2) %>%
   filter(V3>1) %>%
-  summarize(n(),min(V3)) |>
+  summarize(N = n(), 
+            min_F = min(V3)-1, 
+            avg_F = mean(V3-1),
+            median_F = median(V3-1),
+            max_F = max(V3)-1) |>
+  gather() |>
   kable()
 ```
 
@@ -125,13 +139,19 @@ dd <- Fped %>%
 print(dd)
 ```
 
+We can inspect the distribution of inbreeding coefficients (skewed distribution):
+
+```{r}
+hist(Fped$V3-1, breaks = 20)
+```
+
+
 We can also plot inbreeding as a function of the number of generations:
 
 ```{r}
 # ggplot(dd, aes(x = gens, y = avg_inbreeding)) + geom_bar(stat="identity")
 ggplot(dd, aes(x = gens, y = avg_inbreeding)) + geom_point() + geom_smooth(method=lm,se = FALSE)
 ```
-
 
 ```{r}
 mA <- A %>%
@@ -157,5 +177,6 @@ ggsave(plot = p, device = "pdf", filename = "matrix_A.pdf", width = 10, height =
 ```
 
 ```{r}
-calcInbreeding(ped)
+F_values = calcInbreeding(ped)
+kable(F_values)
 ```
