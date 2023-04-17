@@ -122,7 +122,7 @@ tA = t(triA)
 triA[upper.tri(triA)] <- tA[upper.tri(tA)]
 ```
 
-Now we ensure correspondance between the phenotype data and the kinship matrix:
+Now we ensure correspondence between the phenotype data and the kinship matrix:
 
 ```{r example}
 vec <- ped$dog_id %in% phenotypes$id

@@ -24,7 +24,7 @@ mrkrs[1:12,1:12]
 
 ## $F_{HOM}$
 
-F coefficient estimates (i.e. (<observed hom. count> - <expected count>) / (<total observations> - <expected count>))
+F_HOM (<observed hom. count> - <expected count>) / (<total observations> - <expected count>))
 
 - $(p+q)^2$: $p^2$, $q^2$, $2pq$
 
@@ -67,11 +67,11 @@ exp_hom = nsnps-exp_het
 ```
 
 ```{r}
-f_hom = (obs_hom - exp_hom)/(nsnps-exp_hom)
+F_hom = (obs_hom - exp_hom)/(nsnps-exp_hom)
 ```
 Or, equivalently:
 
 ```{r}
-f_is = 1-obs_het/exp_het
+F_is = 1-obs_het/exp_het
 ```
 

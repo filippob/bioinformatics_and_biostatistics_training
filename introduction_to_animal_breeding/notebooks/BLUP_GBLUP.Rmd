@@ -1,0 +1,178 @@
+---
+title: "BLUP & GBLUP"
+author: "Filippo"
+date: "2023-04-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+
+library("sommer")
+library("pedigree")
+library("tidyverse")
+library("data.table")
+```
+
+## BLUP
+
+Here we illustrate the animal model with the dog (Braque Français) dataset:
+
+```{r cars}
+phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
+ped <- fread(file.path(base_folder, "data/pedigree.txt"))
+```
+
+
+```{r pressure, echo=FALSE}
+animals <- rep(TRUE,nrow(ped))
+makeA(ped, animals)
+A <- read.table("A.txt",header=FALSE)
+```
+
+```{r}
+triA <- A |>
+  spread(key = "V2", value = "V3") |>
+  dplyr::select(-V1)
+
+tA = t(triA)
+triA[upper.tri(triA)] <- tA[upper.tri(tA)]
+```
+
+```{r}
+vec <- ped$dog_id %in% phenotypes$id
+A <- as.matrix(triA[vec,vec])
+colnames(A) <- phenotypes$id
+rownames(A) <- phenotypes$id
+```
+
+#### BLUP model
+
+```{r}
+## sample 1/5 of the phenotypes as validation set (set their phenotype to NA)
+y.trn <- dplyr::select(phenotypes, c(id, sex, game))
+vv <- y.trn$id %in% sample(y.trn$id,round(nrow(y.trn)/5))
+y.trn[vv,"game"] <- NA
+y.trn
+```
+
+```{r}
+res = mmer(game ~ sex,
+           random = ~vsr(id, Gu=A),
+           rcov = ~units,
+           nIters = 10,
+           data = y.trn)
+```
+
+
+```{r}
+## predictions
+ids = filter(y.trn, is.na(game)) |> pull(id)
+y_hat = res$U$`u:id`$game
+y_hat = as.data.frame(y_hat)
+y_hat$id = row.names(y_hat)
+y_hat <- y_hat |> inner_join(y.trn, by = "id")
+
+
+sex_effect = filter(res$Beta, Effect == "sex") |> pull(Estimate)
+y_hat <- y_hat |> mutate(y_hat = y_hat + sex_effect*sex)
+
+## model performance in the training set
+pred_train <- filter(y_hat, !(id %in% ids))
+pred_train <- mutate(pred_train, sex = as.factor(sex))
+cor(pred_train$y_hat, pred_train$game)
+ggplot(pred_train, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
+
+## MSE?
+mse_train = sqrt(sum((pred_train$y_hat - pred_train$game)^2)/nrow(pred_train))
+mse_train/mean(phenotypes$game)
+```
+
+
+```{r}
+## model performance in the validation set
+## observations in the validation set
+y = filter(phenotypes, id %in% ids) |> dplyr::select(id, game)
+pred_val = dplyr::select(y_hat, -game) |> inner_join(y, by = "id")
+pred_val <- mutate(pred_val, sex = as.factor(sex))
+cor(pred_val$y_hat, pred_val$game) ## correlation between observed and predicted values
+ggplot(pred_val, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
+
+## MSE?
+mse_val = sqrt(sum((pred_val$y_hat - pred_val$game)^2)/nrow(pred_val))
+mse_val/mean(phenotypes$game)
+```
+
+## GBLUP
+
+```{r marker_data}
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
+
+mat <- as.matrix(mrkrs[,-c(1:6)])
+```
+
+```{r}
+K <- A.mat(mat)
+colnames(K) <- mrkrs$IID
+rownames(K) <- mrkrs$IID
+```
+
+
+```{r}
+## sample 1/5 of the phenotypes as validation set (set their phenotype to NA)
+y.trn <- dplyr::select(phenotypes, c(id, sex, game))
+vv <- y.trn$id %in% sample(y.trn$id,round(nrow(y.trn)/5))
+y.trn[vv,"game"] <- NA
+y.trn
+```
+
+
+```{r}
+res = mmer(game ~ sex,
+           random = ~vsr(id, Gu=K),
+           rcov = ~units,
+           nIters = 10,
+           data = y.trn)
+```
+
+
+```{r}
+## predictions
+ids = filter(y.trn, is.na(game)) |> pull(id)
+y_hat = res$U$`u:id`$game
+y_hat = as.data.frame(y_hat)
+y_hat$id = row.names(y_hat)
+y_hat <- y_hat |> inner_join(y.trn, by = "id")
+
+
+sex_effect = filter(res$Beta, Effect == "sex") |> pull(Estimate)
+y_hat <- y_hat |> mutate(y_hat = y_hat + sex_effect*sex)
+
+## model performance in the training set
+pred_train <- filter(y_hat, !(id %in% ids))
+pred_train <- mutate(pred_train, sex = as.factor(sex))
+cor(pred_train$y_hat, pred_train$game)
+ggplot(pred_train, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
+
+## MSE?
+mse_train = sqrt(sum((pred_train$y_hat - pred_train$game)^2)/nrow(pred_train))
+mse_train/mean(phenotypes$game)
+```
+
+
+```{r}
+## model performance in the validation set
+## observations in the validation set
+y = filter(phenotypes, id %in% ids) |> dplyr::select(id, game)
+pred_val = dplyr::select(y_hat, -game) |> inner_join(y, by = "id")
+pred_val <- mutate(pred_val, sex = as.factor(sex))
+cor(pred_val$y_hat, pred_val$game) ## correlation between observed and predicted values
+ggplot(pred_val, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
+
+## MSE?
+mse_val = sqrt(sum((pred_val$y_hat - pred_val$game)^2)/nrow(pred_val))
+mse_val/mean(phenotypes$game)
+```
