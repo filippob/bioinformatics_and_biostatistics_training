@@ -18,13 +18,12 @@ Material from courses, training and research activities.
 
 1. [basic statistics](introduction_to_animal_breeding/notebooks/stat_base.R)
 2. matrix algebra recap (super-quick)
-3. general introduction to animal breeding
+3. [general introduction to animal breeding](introduction_to_animal_breeding/notebooks/breeding.R)
 4. heritability estimation
 5. pedigree and kinship matrices
 6. mixed models
 7. enter genomics
-8. runs of homozygosity (ROH)
-9. genomic inbreeding
+9. [runs of homozygosity (ROH) and genomic inbreeding](introduction_to_animal_breeding/notebooks/genomic_inbreeding_roh.Rmd)
 10. multiple trait models and genetic correlations
 11. selection index theory
 
