@@ -16,7 +16,7 @@ Material from courses, training and research activities.
 
 ### Course "Introduction to animal breeding" - University of Pisa (1st year BSc)
 
-1. basic statistics
+1. [basic statistics](introduction_to_animal_breeding/notebooks/stat_base.R)
 2. matrix algebra recap (super-quick)
 3. general introduction to animal breeding
 4. heritability estimation
