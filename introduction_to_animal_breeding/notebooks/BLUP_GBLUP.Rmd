@@ -25,6 +25,7 @@ phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
 ped <- fread(file.path(base_folder, "data/pedigree.txt"))
 ```
 
+Let's create the additive relationship matrix from pedigree data:
 
 ```{r pressure, echo=FALSE}
 animals <- rep(TRUE,nrow(ped))
@@ -48,7 +49,14 @@ colnames(A) <- phenotypes$id
 rownames(A) <- phenotypes$id
 ```
 
+```{r}
+heatmap(A)
+```
+
+
 #### BLUP model
+
+We use one fifth (1/5) of the data as validation (phenotype set to missing $\rightarrow$ "masked" phenotypes)
 
 ```{r}
 ## sample 1/5 of the phenotypes as validation set (set their phenotype to NA)
@@ -58,6 +66,8 @@ y.trn[vv,"game"] <- NA
 y.trn
 ```
 
+Ready to run the BLUP model!
+
 ```{r}
 res = mmer(game ~ sex,
            random = ~vsr(id, Gu=A),
@@ -66,6 +76,9 @@ res = mmer(game ~ sex,
            data = y.trn)
 ```
 
+#### Predictions
+
+We can now make predictions in the training set:
 
 ```{r}
 ## predictions
@@ -82,7 +95,10 @@ y_hat <- y_hat |> mutate(y_hat = y_hat + sex_effect*sex)
 ## model performance in the training set
 pred_train <- filter(y_hat, !(id %in% ids))
 pred_train <- mutate(pred_train, sex = as.factor(sex))
-cor(pred_train$y_hat, pred_train$game)
+print(paste("The correlation between predicted and observed phenotypes in the TRAINING SET is: ", cor(pred_train$y_hat, pred_train$game)))
+```
+
+```{r plot_training_preds}
 ggplot(pred_train, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
 
 ## MSE?
@@ -90,6 +106,7 @@ mse_train = sqrt(sum((pred_train$y_hat - pred_train$game)^2)/nrow(pred_train))
 mse_train/mean(phenotypes$game)
 ```
 
+We can now make predictions in the **validation set**:
 
 ```{r}
 ## model performance in the validation set
@@ -97,7 +114,10 @@ mse_train/mean(phenotypes$game)
 y = filter(phenotypes, id %in% ids) |> dplyr::select(id, game)
 pred_val = dplyr::select(y_hat, -game) |> inner_join(y, by = "id")
 pred_val <- mutate(pred_val, sex = as.factor(sex))
-cor(pred_val$y_hat, pred_val$game) ## correlation between observed and predicted values
+print(paste("The correlation between predicted and observed phenotypes in the VALIDATION SET is: ", cor(pred_val$y_hat, pred_val$game))) ## correlation between observed and predicted values
+```
+
+```{r corr_validation}
 ggplot(pred_val, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
 
 ## MSE?
@@ -107,6 +127,8 @@ mse_val/mean(phenotypes$game)
 
 ## GBLUP
 
+Enter genomics:
+
 ```{r marker_data}
 base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
 mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
@@ -114,12 +136,19 @@ mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
 mat <- as.matrix(mrkrs[,-c(1:6)])
 ```
 
+Let's make the genomic relationship matrix from SNP marker data:
+
 ```{r}
-K <- A.mat(mat)
+K <- A.mat(mat, endelman = FALSE)
 colnames(K) <- mrkrs$IID
 rownames(K) <- mrkrs$IID
 ```
 
+```{r}
+heatmap(K)
+```
+
+SAme approach as before: 1/5 of the data is used for validation (setting phenotypes to missing):
 
 ```{r}
 ## sample 1/5 of the phenotypes as validation set (set their phenotype to NA)
@@ -129,6 +158,7 @@ y.trn[vv,"game"] <- NA
 y.trn
 ```
 
+And now we run the **GBLUP model**:
 
 ```{r}
 res = mmer(game ~ sex,
@@ -155,6 +185,9 @@ y_hat <- y_hat |> mutate(y_hat = y_hat + sex_effect*sex)
 pred_train <- filter(y_hat, !(id %in% ids))
 pred_train <- mutate(pred_train, sex = as.factor(sex))
 cor(pred_train$y_hat, pred_train$game)
+```
+
+```{r}
 ggplot(pred_train, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
 
 ## MSE?
@@ -170,6 +203,9 @@ y = filter(phenotypes, id %in% ids) |> dplyr::select(id, game)
 pred_val = dplyr::select(y_hat, -game) |> inner_join(y, by = "id")
 pred_val <- mutate(pred_val, sex = as.factor(sex))
 cor(pred_val$y_hat, pred_val$game) ## correlation between observed and predicted values
+```
+
+```{r gblup_validation}
 ggplot(pred_val, aes(x = y_hat, y = game)) + geom_jitter(aes(color=sex))
 
 ## MSE?
