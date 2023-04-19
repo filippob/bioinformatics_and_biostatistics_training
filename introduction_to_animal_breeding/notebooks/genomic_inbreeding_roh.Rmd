@@ -6,14 +6,13 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library("tidyverse")
 library("data.table")
 ```
 
-## R Markdown
+### The data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+We use SNP (genomic) data from a sample of *Braque Français dogs*, to calculate **genomic measures of inbreeding**.
 
 ```{r marker_data}
 base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
@@ -22,21 +21,32 @@ mrkrs = fread(file.path(base_folder, "data/bra_imp_maf0.05.raw"))
 mrkrs[1:12,1:12]
 ```
 
-## $F_{HOM}$
+## Genomic inbreeding $\text{F}_{\text{HOM}}$
 
-F_HOM (<observed hom. count> - <expected count>) / (<total observations> - <expected count>))
+First, we start with $\text{F}_{\text{HOM}}$ which based on single SNP genotype data. Basically, we calculate the following ratio:
 
-- $(p+q)^2$: $p^2$, $q^2$, $2pq$
+(observed homozygous count - expected homozygous count\>) / (total n. of SNPs - expected homozygous count)
 
+This is based on counting of the genotyping data and on the **Hardy-Weinberg equilibrium**: $(p+q)^2$: $p^2$, $q^2$, $2pq$
+
+For each individual we:
+
+-   count the n. of homozygous SNPs (AA or BB)
+-   calculate the expected n. of homozygous SNPs ($2pq$)
+-   count the total n. of SNPs
 
 ```{r}
 mat <- as.matrix(mrkrs[,-c(1:6)])
 ```
 
 ```{r}
+## total n. of SNPs
 nsnps = ncol(mat)
 ```
 
+#### Calculate allele frequencies
+
+We now caclulate $p$ and $q$, the frequencies of the two SNP alleles, necessary to compute the expected homozygosity counts under Hardy-Weinberg:
 
 ```{r}
 aa = rowSums(mat == 0)
@@ -53,11 +63,15 @@ mean(tot) == ncol(mat) ## sanity check
 sd(tot) ## further sanity check (checks to zero)
 ```
 
+-   $p$: frequency of *A* alleles $\rightarrow$ twice the number of "AA" genotypes, plus once the number of "AB" genotypes, divided by twice the n. of SNPs (two alleles for each SNP)
+-   $q$: this is simply the complement to one of $p$ (since the two relative frequencies must sum to 1)
+
 ```{r}
 p = (2*aa+ab)/(2*nsnps)
 q = 1-p
 ```
 
+#### Calculate observed and expected homozygous SNP
 
 ```{r}
 obs_hom = rowSums(mat != 1)
@@ -66,12 +80,108 @@ exp_het = nsnps*(2*p*q)
 exp_hom = nsnps-exp_het
 ```
 
+#### Calculate genomic inbreeding
+
+Now we have all the ingredients to calculate $\text{F}_{\text{HOM}}$:
+
 ```{r}
 F_hom = (obs_hom - exp_hom)/(nsnps-exp_hom)
 ```
+
 Or, equivalently:
 
 ```{r}
 F_is = 1-obs_het/exp_het
+```
+
+```{r}
+plot(density(F_hom))
+```
+
+
+```{r}
+boxplot(F_hom)
+```
+
+```{r}
+summary(F_hom)
+```
+
+
+## Runs of homozygosity
+
+```{r}
+library("detectRUNS")
+```
+#### Detect runs
+
+We first detect **ROH** in individual dogs:
+
+```{r}
+runs <- consecutiveRUNS.run(
+  genotypeFile = "../data/braque.ped",
+  mapFile = "../data/braque.map",
+  minSNP = 20,
+  ROHet = FALSE,
+  maxGap = 10^6,
+  minLengthBps = 5e+5,
+  maxOppRun = 2,
+  maxMissRun = 2
+)
+```
+
+
+```{r}
+plot_Runs(runs = filter(runs, chrom == 6))
+```
+
+#### Calculate $\text{F}_{\text{ROH}}$
+
+Genome size from: https://www.ncbi.nlm.nih.gov/assembly/GCF_000002285.3/#/st
+
+```{r}
+total_genome = 2410976875
+sex_chromosome = 123869142
+length_autosome = total_genome - sex_chromosome
+```
+
+```{r}
+dd <- runs |>
+  filter(chrom != "39") |> ## remove the sex chromosome
+  group_by(id) |>
+  summarise(length_roh = sum(lengthBps)) |>
+  mutate(f_roh = length_roh/length_autosome)
+```
+
+```{r}
+print(dd)
+```
+
+```{r}
+plot(density(dd$f_roh))
+```
+
+```{r}
+boxplot(dd$f_roh)
+```
+
+```{r}
+summary(dd$f_roh)
+```
+
+### Relationship between $\text{F}_{\text{HOM}}$ and  $\text{F}_{\text{ROH}}$
+
+```{r}
+f_hom = data.frame("id" = mrkrs$IID, "f_hom" = F_hom)
+dd <- dd |> inner_join(f_hom, by = "id")
+```
+
+
+```{r}
+plot(dd$f_hom, dd$f_roh)
+```
+
+```{r}
+cor(dd$f_roh, dd$f_hom)
 ```
 
