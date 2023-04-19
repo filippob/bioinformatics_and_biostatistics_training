@@ -19,14 +19,17 @@ Material from courses, training and research activities.
 1. [basic statistics](introduction_to_animal_breeding/notebooks/stat_base.R)
 2. matrix algebra recap (super-quick)
 3. [general introduction to animal breeding](introduction_to_animal_breeding/notebooks/breeding.R)
-4. heritability estimation
-5. pedigree and kinship matrices
-6. mixed models
-7. enter genomics
-9. [runs of homozygosity (ROH) and genomic inbreeding](introduction_to_animal_breeding/notebooks/genomic_inbreeding_roh.Rmd)
-10. multiple trait models and genetic correlations
-11. selection index theory
+4. [heritability estimation](introduction_to_animal_breeding/notebooks/heritability.Rmd)
+5. [pedigree and kinship matrices](introduction_to_animal_breeding/notebooks/pedigree.Rmd)
+6. enter genomics: [genomic relationship matrices](introduction_to_animal_breeding/notebooks/g_matrix.Rmd)
+7. [runs of homozygosity (ROH) and genomic inbreeding](introduction_to_animal_breeding/notebooks/genomic_inbreeding_roh.Rmd)
+8. mixed models: [BLUP and GBLUP](introduction_to_animal_breeding/notebooks/BLUP_GBLUP.Rmd)
+9. multiple trait models and genetic correlations
+10. selection index theory
+11. brief introduction to deep learning
+12. models for image recognition: computer vision for veterinary diagnosis (and for genomic selection)
 
 ### Resources
 
 - R : [The Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN)
+- Python: [The Python Tutorial](https://docs.python.org/3/tutorial/)
