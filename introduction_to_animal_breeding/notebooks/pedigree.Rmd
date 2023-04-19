@@ -76,7 +76,15 @@ crA <- function(ped) {
 Finally, we apply it:
 
 ```{r}
-crA(pedex)
+exA <- crA(pedex)
+```
+
+```{r}
+exA
+```
+
+```{r}
+heatmap(exA)
 ```
 
 We now use the *R* package `pedigree` to handle the dog pedigree data that we have loaded above (many other options available in R and other software packages). The function `makeA` is used to build the genetic relationship matrix.
@@ -145,7 +153,6 @@ We can inspect the distribution of inbreeding coefficients (skewed distribution)
 hist(Fped$V3-1, breaks = 20)
 ```
 
-
 We can also plot inbreeding as a function of the number of generations:
 
 ```{r}
@@ -174,6 +181,26 @@ p <- p + guides(fill=guide_legend(title="A"))
 print(p)
 
 ggsave(plot = p, device = "pdf", filename = "matrix_A.pdf", width = 10, height = 10)
+```
+
+```{r}
+triA <- A |>
+  spread(key = "V2", value = "V3") |>
+  dplyr::select(-V1)
+
+tA = t(triA)
+triA[upper.tri(triA)] <- tA[upper.tri(tA)]
+```
+
+```{r}
+vec <- ped$dog_id %in% phenotypes$id
+fullA <- as.matrix(triA[vec,vec])
+colnames(fullA) <- phenotypes$id
+rownames(fullA) <- phenotypes$id
+```
+
+```{r}
+heatmap(fullA)
 ```
 
 ```{r}
