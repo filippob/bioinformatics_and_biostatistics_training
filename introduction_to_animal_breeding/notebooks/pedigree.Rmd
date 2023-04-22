@@ -109,10 +109,12 @@ A %>%
   kable()
 ```
 
+We now filter only animals from the pedigree whose inbreeding coefficient is higher than 0 ($F_i = a_{ii}-1$):
+
 ```{r}
 A %>%
   filter(V1==V2) %>%
-  filter(V3>1) %>%
+  filter(V3>1) %>% ## F_i = a_ii - 1
   summarize(N = n(), 
             min_F = min(V3)-1, 
             avg_F = mean(V3-1),
@@ -193,15 +195,18 @@ triA[upper.tri(triA)] <- tA[upper.tri(tA)]
 ```
 
 ```{r}
+phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
 vec <- ped$dog_id %in% phenotypes$id
 fullA <- as.matrix(triA[vec,vec])
-colnames(fullA) <- phenotypes$id
-rownames(fullA) <- phenotypes$id
+colnames(fullA) <- phenotypes$dog_id
+rownames(fullA) <- phenotypes$dog_id
 ```
 
 ```{r}
 heatmap(fullA)
 ```
+
+Finally, the `pedigree` package gives us a convenient function to calculate the inbreeding for all animals in our pedigree (or a subset thereof):
 
 ```{r}
 F_values = calcInbreeding(ped)
