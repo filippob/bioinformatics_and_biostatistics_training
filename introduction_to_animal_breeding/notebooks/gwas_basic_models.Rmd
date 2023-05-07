@@ -6,6 +6,9 @@ output:
   ioslides_presentation:
       css: styles.css
   slidy_presentation: default
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -22,28 +25,37 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ## GWAS: a one-SNP model
 
-For a quantitative trait (continuous target variable), the basic model is a **linear regression model** of the following form:
+For a quantitative trait (continuous target variable), the basic model
+is a **linear regression model** of the following form:
 
 $$
 y_{ij}=\mu+SNP_j+e_{ij}
 $$
 
-where $y_{ij}$ is the phenotypic observation for sample *i* with SNP genotype *j*, $SNP_j$ is the effect of SNP genotype *j* (e.g. AA, AB, BB), and $e_{ij}$ are the residuals of the model ($\mu$ is the intercept).
+where $y_{ij}$ is the phenotypic observation for sample *i* with SNP
+genotype *j*, $SNP_j$ is the effect of SNP genotype *j* (e.g. AA, AB,
+BB), and $e_{ij}$ are the residuals of the model ($\mu$ is the
+intercept).
 
-## Loading the data
+### Loading the data
 
-We use a dog dataset: *Nova Scotia Duck Tolling Retriever* (NSDTR), with **125 dogs** on a genetic defect, *cleft palate*: **112 controls**, **13 cases**
+We use a dog dataset: *Nova Scotia Duck Tolling Retriever* (NSDTR), with
+**125 dogs** on a genetic defect, *cleft palate*: **112 controls**, **13
+cases**
 
-The original data can be downloaded from here: https://datadryad.org/stash/dataset/doi:10.5061/dryad.j8r8q 
-(for this practical, the data are already provided).
+The original data can be downloaded from here:
+<https://datadryad.org/stash/dataset/doi:10.5061/dryad.j8r8q> (for this
+practical, the data are already provided).
 
-!! WARNING: we use here a binary trait as it were a continuous trait: this is fine for the purpose of this practical, however keep in mind that 
-with binary variables logistic regression should be used in stead of linear regression !!
+!! WARNING: we use here a binary trait as it were a continuous trait:
+this is fine for the purpose of this practical, however keep in mind
+that with binary variables logistic regression should be used in stead
+of linear regression !!
 
 Let's read in the data:
 
-- phenotypes: dog, family, status (case or control)
-- genotypes: dog, SNP genotypes (0/1/2)
+-   phenotypes: dog, family, status (case or control)
+-   genotypes: dog, SNP genotypes (0/1/2)
 
 ```{r data_sheep, echo=TRUE}
 phenotypes <- read.table(
@@ -63,49 +75,52 @@ names(df) <- c("id","family","disease","snp")
 kable(head(df))
 ```
 
-## Modelling number of copies of the minor allele
+### Modelling number of copies of the minor allele
 
-We can model SNP genotypes as the number of copies of the minor allele: 0, 1, 2 (numeric variable).
-We apply the usual `R` syntax for a simple **linear regression model**:
+We can model SNP genotypes as the number of copies of the minor allele:
+0, 1, 2 (numeric variable). We apply the usual `R` syntax for a simple
+**linear regression model**:
 
 ```{r model1, echo=TRUE}
 fit <- lm(disease ~ snp, data = df)
 ```
 
-## Results - summary(fit)
+### Results - summary(fit)
 
 ```{r, echo=FALSE}
 g <- summary(fit)
 print(g)
 ```
 
-## ANOVA table
+### ANOVA table
 
 ```{r, echo=TRUE}
 kable(anova(fit))
 ```
 
+### Add population structure
 
-## Add population structure
+The dogs belongs all to the same breed: there's no easy way in this case
+to account for population structure by simply adding the
+`breed variable` in the model. We can however extract the **principal
+components of the genetic data** and use these as variables in the GWAS
+model to account for population structure.
 
-The dogs belongs all to the same breed: there's no easy way in this case to account for population structure by simply adding the `breed variable` in the model.
-We can however extract the **principal components of the genetic data** and use these as variables in the GWAS model to account for population structure.
-
-### PC's
+#### PC's
 
 ```{r, echo=TRUE}
 pc <- prcomp(genotypes[,-1], rank. = 3)
 df <- cbind.data.frame(df,pc$x)
 ```
 
-## Eigenvalues
+#### Eigenvalues
 
 ```{r, echo=TRUE}
 eig <- (pc$sdev)^2
 variance <- eig*100/sum(eig)
 ```
 
-## Barplot of eigenvalues
+#### Barplot of eigenvalues
 
 ```{r, echo=TRUE}
 barplot(variance, col="red", xlab = "Principal Components", 
@@ -113,7 +128,7 @@ barplot(variance, col="red", xlab = "Principal Components",
 sum(variance[c(1:3)])
 ```
 
-## Use principal components to model population structure
+#### Use principal components to model population structure
 
 ```{r, echo=TRUE}
 fit <- lm(
@@ -122,7 +137,7 @@ fit <- lm(
 )
 ```
 
-## Results - summary(fit) {.smaller}
+#### Results - summary(fit) {.smaller}
 
 ```{r, echo=FALSE}
 g <- summary(fit)
@@ -131,14 +146,12 @@ print(g)
 
 ## Multi-SNP model
 
-Up to here we have applied our GWAS model to **only one SNP**; 
-however, **typical GWAS projects include thousands of SNPs**.
-Let's see how to do GWAS with our entire dataset.
+Up to here we have applied our GWAS model to **only one SNP**; however,
+**typical GWAS projects include thousands of SNPs**. Let's see how to do
+GWAS with our entire dataset.
 
-We have:
-- 125 dogs
-- one phenotype (disease): 112 controls, 13 cases
-- genotypes at $10\,899$ SNP loci
+We have: - 125 dogs - one phenotype (disease): 112 controls, 13 cases -
+genotypes at $10\,899$ SNP loci
 
 ### SNP genotypes
 
@@ -158,7 +171,7 @@ SNP_INFO$cM <- NULL
 ```{r}
 X <- as.matrix(genotypes[,-1]) ## first column: dog ID
 colnames(X) <- gsub("\\_[A-Z]{1}$","",colnames(X))
-rownames(X) <- snp_matrix$IID
+rownames(X) <- genotypes$IID
 
 SNP_INFO <- bind_cols(SNP_INFO,as.data.frame(t(X)))
 
@@ -175,18 +188,20 @@ phenotypes <- phenotypes[,c(1,3)]
 
 ### Kinship matrix
 
-We saw that one option to account for population structure in the GWAS models is to use
-principal components extracted from the SNP genotype data.
+We saw that one option to account for population structure in the GWAS
+models is to use principal components extracted from the SNP genotype
+data.
 
-Better still, we can use the kinship matrix (that we introduced in a previous module):
-in this way, we can use the entire genomic information available, rather than just that 
-encapsulated in the first principal components.
+Better still, we can use the kinship matrix (that we introduced in a
+previous module): in this way, we can use the entire genomic information
+available, rather than just that encapsulated in the first principal
+components.
 
-Additionally, we can use the genomic information in the form of a covariance matrix,
-rather than as additive systematic effects.
+Additionally, we can use the genomic information in the form of a
+covariance matrix, rather than as additive systematic effects.
 
 ```{r}
-K <- A.mat(X, endelman = FALSE)
+K <- sommer::A.mat(X, endelman = FALSE)
 colnames(K) <- genotypes$IID
 rownames(K) <- genotypes$IID
 
@@ -210,19 +225,29 @@ model1_x <- rrBLUP::GWAS(
 )
 ```
 
-###########
 ### RESULTS
-###########
+
+File with results from GWAS:
 
 ```{r}
 print("writing out results and figures ...")
 names(model1_x)[length(model1_x)] <- "disease"
 gwasResults <- model1_x[,c("SNP","Chr","Pos","disease")]
 names(gwasResults) <- c("SNP","CHR","BP","P")
+head(gwasResults) |> kable()
+```
 
+#### Manhattan plot
+
+```{r}
 qqman::manhattan(gwasResults, suggestiveline = TRUE, col = c("red","blue"),
           genomewideline = FALSE, logp = FALSE)
 
+```
+
+#### QQ-plot
+
+```{r}
 # convert -log(p) back to p-values
 p <- 10^((-gwasResults$P))
 
@@ -231,7 +256,5 @@ names(gwasResults)[4] <- "log_p"
 gwasResults$P <- p
 
 ## qq-plot
-qq(p)
+qqman::qq(p)
 ```
-
-
