@@ -1,4 +1,7 @@
 ## R script to read in results from 16S rRNA-gene seq
+## input files are.
+## - OTU table in the .biom format (filtered or not)
+## - metadata that map samples' OTU abundances to samples' covariables (experimental groups etc.)
 
 library("readxl")   
 library("phyloseq")  
