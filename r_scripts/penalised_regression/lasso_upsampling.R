@@ -10,7 +10,7 @@ library("tidymodels")
 ##############
 ## PARAMETERS
 ##############
-fname = "PI/data.RData" ## input data
+fname = "example/data.RData" ## input data
 ncpus = 4
 upsample_ratio = 1.25 ## default = 1
 ###################
@@ -22,9 +22,11 @@ load(fname)
 
 ## data cleaning
 writeLines(" - data cleaning")
+## using support variable "category" for upsampling
 temp <- test %>%
   select(-batch) |>
-  mutate(across(c(study_bis, sex, country_simply, opioid, canc_diag_simply, chemotherapy), as.factor))
+  mutate(across(c(study, sex, country, treatment, diagnosis, therapy), as.factor),
+         category=cut(score_intensity, breaks=c(-Inf, 2, Inf), labels=c("low","high")))
 
 # Setup parallel backend to use n. processors
 cl <- makeCluster(ncpus)
@@ -33,12 +35,7 @@ registerDoParallel(cl)
 ############################
 ## tidymodels con upsampling
 ############################
-writeLines(" - using tidymodels")
-
-temp <- test %>%
-  select(-batch) |>
-  mutate(across(c(study_bis, sex, country_simply, opioid, canc_diag_simply, chemotherapy), as.factor),
-         category=cut(av_pain_intensity, breaks=c(-Inf, 2, Inf), labels=c("low","high")))
+print("Using tidymodels")
 
 ## training / test split
 writeLines(" - split data")
@@ -59,7 +56,7 @@ up_train <- juice(upsample_prep)
 ##############################
 ## CV - FINE TUNING OF LAMBDA
 ##############################
-mod_rec <-  recipe(av_pain_intensity ~ ., data = up_train) %>%
+mod_rec <-  recipe(score_intensity ~ ., data = up_train) %>%
   update_role(category, new_role = "dataset split variable") |>
   step_zv(all_numeric(), -all_outcomes()) %>%
   step_normalize(all_numeric(), -all_outcomes()) |>
@@ -143,7 +140,7 @@ lr_res %>%
   collect_metrics()
 
 lr_res %>% collect_predictions() |>
-  summarise(r_xv = cor(.pred,av_pain_intensity))
+  summarise(r_xv = cor(.pred, score_intensity))
 
 preds1 = lr_res %>% collect_predictions()
 
@@ -166,7 +163,7 @@ last_lasso_mod <-
 
 last_lasso_wf <- workflow() |>
   add_model(last_lasso_mod) |>
-  add_formula(av_pain_intensity ~ .)
+  add_formula(score_intensity ~ .)
 
 final_lasso_fit <- fit(last_lasso_wf, data = mtbsl1_training) ## fit final model on the training set
 print(final_lasso_fit)
@@ -175,12 +172,12 @@ final_lasso_fit$pre
 ## 3 make predictions
 preds = final_lasso_fit %>%
   predict(new_data = mtbsl1_testing, type = "numeric") %>%
-  bind_cols(mtbsl1_testing$av_pain_intensity) |>
+  bind_cols(mtbsl1_testing$score_intensity) |>
   rename(av_pain_intensity = `...2`)
 
-cor(preds$.pred, preds$av_pain_intensity)
-sqrt(sum((preds$av_pain_intensity-preds$.pred)^2)/nrow(preds))
+cor(preds$.pred, preds$score_intensity)
+sqrt(sum((preds$score_intensity-preds$.pred)^2)/nrow(preds))
 
-ggplot(data = preds, aes(.pred, av_pain_intensity)) + geom_point()
+ggplot(data = preds, aes(.pred, score_intensity)) + geom_point()
 
-
+print("DONE!")
