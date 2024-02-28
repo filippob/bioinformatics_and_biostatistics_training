@@ -178,6 +178,12 @@ preds = final_lasso_fit %>%
 cor(preds$.pred, preds$score_intensity)
 sqrt(sum((preds$score_intensity-preds$.pred)^2)/nrow(preds))
 
-ggplot(data = preds, aes(.pred, score_intensity)) + geom_point()
+ggplot(data = preds, aes(.pred, av_pain_intensity)) + geom_point() |>
+  ggsave("correlation.png", device = "png")
+
+
+writeLines(" - saving out model fit results")
+to_save = list(lasso_grid, best_ccc, final_lasso, lr_res, final_lasso_fit)
+save(to_save, file = outfile)
 
 print("DONE!")
