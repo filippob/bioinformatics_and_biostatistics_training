@@ -2,6 +2,9 @@
 ## Practicals: general intro to animal breeding   ##
 ####################################################
 
+#####################################################
+## PART 1
+#####################################################
 library("tidyverse")
 library("data.table")
 
@@ -14,7 +17,7 @@ library("data.table")
 ## more here: https://wiki.groenkennisnet.nl/space/TAB/3735652/Chapter+5.7+Next+generation%3A+transmission+model
 ## brain teaser: how many possible 50% combinations with 10 genes?
 
-n = 10
+n = 10 ## n. of genes/alleles
 k = (n/2) ## 50%
 
 factorial(n)/(factorial(k)*factorial(n-k))
@@ -53,6 +56,16 @@ r_ay <- cov(ebv,y)/(sdg*sd(y))
 sqrt(h2)
 ##########################################
 
+#####################################################
+## END OF PART 1
+#####################################################
+
+###
+###
+
+#####################################################
+## PART 2
+#####################################################
 
 ##########################################
 ## PARENT - OFFSPRING REGRESSION	    ##	 
