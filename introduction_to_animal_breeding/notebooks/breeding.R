@@ -7,6 +7,11 @@ library("data.table")
 
 ## Combinations ##
 ## Mendelian sampling: each descendant receives a different 50% of the parental (sire/dam) genes (random samples)
+## - each animal receives half genes from its sire and half genes from its dam
+## - each time (meiosis) a different half of the sire's (dam's) gene pool is randomly (more or less) samples
+## - the term "gene" is used here in loose sense: gene can refer to the locus (each animal has all the loci belonging to that species),
+## - or it can refer to the specific allele (the specific homolog which is transmitted at meiosis)
+## more here: https://wiki.groenkennisnet.nl/space/TAB/3735652/Chapter+5.7+Next+generation%3A+transmission+model
 ## brain teaser: how many possible 50% combinations with 10 genes?
 
 n = 10
@@ -105,6 +110,8 @@ height <- fread(file=file.path(base_folder, "data/height.csv"))
 # midParent #
 x = NULL
 y = NULL
+
+lm(HeightOffspring ~ midParent, data = height)
 
 ## 1. calculate the heritability
 ## 2. plot the data and the fitted curve from linear regression
