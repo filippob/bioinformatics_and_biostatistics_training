@@ -1,0 +1,212 @@
+---
+title: "pedigree relationship matrix"
+author: "Filippo"
+date: "2023-03-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library("knitr")
+library("pedigree")
+library("tidyverse")
+library("data.table")
+```
+
+## Pedigree data - genealogies
+
+We use pedigree data on a small sample from a dog breed (Braque Français):⎄
+
+```{r pedigree_data}
+base_folder = "/home/filippo/Documents/ciampolini/unipisa_2023/bioinformatics_and_biostatistics_training/introduction_to_animal_breeding"
+ped <- fread(file.path(base_folder, "data/pedigree.txt"))
+
+head(ped) |> kable()
+```
+
+```{r}
+print(dim(ped))
+```
+
+### Pedigree genetic relationship matrix
+
+We first define a synthetic dataset as example:
+
+```{r}
+id <- 1:6
+dam <- c(0,0,1,1,4,4)
+sire <- c(0,0,2,2,3,5)
+pedex <- data.frame(id,dam,sire)
+```
+
+Then we write a simple function (not optimised!) to implement the **recursive (tabular) method** for the calculation of the kinship matrix:
+
+```{r}
+crA <- function(ped) {
+  
+  n = dim(ped)[1];
+  A = diag(1,n);
+  p = ped[,2];
+  m = ped[,3];
+  
+  for(i in 1:n) {        ## browse rows
+    for(j in i:n) {  ## column from diagonal
+      if(i==j) {          ## if diagonal element
+        if(p[j] > 0) {      ## known sire
+          if(m[j] > 0) {    ## known dam
+            A[i,j] <- A[i,j]+A[p[i],m[i]]/2     ## add inbreeding if present
+          }
+        }
+      } else  {           ## if off-diagonal element
+        if(p[j] > 0) {
+          A[i,j] < -A[i,j]+A[i,p[j]]/2;         ## add sire contribution
+        }
+        if(m[j]>0) {
+          A[i,j] <- A[i,j]+A[i,m[j]]/2;         ## add dam contribution
+        }
+        A[j,i] <- A[i,j];     ## A matrix is symmetric
+      }
+    }
+  }
+  A;
+}
+```
+
+Finally, we apply it:
+
+```{r}
+exA <- crA(pedex)
+```
+
+```{r}
+exA
+```
+
+```{r}
+heatmap(exA)
+```
+
+We now use the *R* package `pedigree` to handle the dog pedigree data that we have loaded above (many other options available in R and other software packages). The function `makeA` is used to build the genetic relationship matrix.
+
+```{r}
+animals <- rep(TRUE,nrow(ped))
+makeA(ped, animals)
+A <- read.table("A.txt",header=FALSE)
+kable(head(A)) # A matrix (long format)
+```
+
+Let's look at the diagonal elements: what can we say?
+
+```{r}
+A %>%
+  filter(V1==V2) %>%
+  summarize(avg = mean(V3), 
+            std = sd(V3),
+            min = min(V3),
+            max = max(V3)) |>
+  gather(key = "statistic", value = "value")
+```
+
+We now filter only animals from the pedigree whose inbreeding coefficient is higher than 0 ($F_i = a_{ii}-1$):
+
+```{r}
+A %>%
+  filter(V1==V2) %>%
+  filter(V3>1) %>% ## F_i = a_ii - 1
+  summarize(N = n(), 
+            min_F = min(V3)-1, 
+            avg_F = mean(V3-1),
+            median_F = median(V3-1),
+            max_F = max(V3)-1) |>
+  gather()
+```
+
+### Generations and inbreeding
+
+Here's a way to obtain the generation number for each dog in the pedigree:
+
+```{r}
+gens <- countGen(ped)
+gens <- gens[animals]
+gens
+```
+
+Now we select the kinship coefficients of each animal with itself (**pedigree inbreeding**), and we calculate the average inbreeding by generation:
+
+```{r}
+Fped <- A %>%
+  filter(V1==V2)
+
+Fped <- cbind.data.frame(Fped,gens)
+
+dd <- Fped %>%
+  group_by(gens) %>%
+  summarize(avg_inbreeding = mean(V3))
+
+print(dd)
+```
+
+We can inspect the distribution of inbreeding coefficients (skewed distribution):
+
+```{r}
+hist(Fped$V3-1, breaks = 20)
+```
+
+We can also plot inbreeding as a function of the number of generations:
+
+```{r}
+# ggplot(dd, aes(x = gens, y = avg_inbreeding)) + geom_bar(stat="identity")
+ggplot(dd, aes(x = gens, y = avg_inbreeding)) + geom_point() + geom_smooth(method=lm,se = FALSE)
+```
+
+```{r}
+mA <- A %>%
+  filter(V1!=V2) %>%
+  dplyr::rename(V2=V1, V1=V2)
+
+mA <- bind_rows(A,mA)
+```
+
+```{r}
+p <- ggplot(mA, aes(V1,V2))
+p <- p + geom_tile(aes(fill=V3)) + xlab("id1") + ylab("id2")
+# p <- p + scale_x_continuous(breaks=unique(mK$id1),labels=ids$id)
+p <- p + theme(axis.text.x = element_text(angle=90, hjust = 1,vjust=1,size = 8))
+p <- p +  scale_fill_gradient2(low = "white", 
+                               mid = "yellow", 
+                               high = "red", 
+                               midpoint = 0.5)
+p <- p + guides(fill=guide_legend(title="A"))
+print(p)
+
+ggsave(plot = p, device = "pdf", filename = "matrix_A.pdf", width = 10, height = 10)
+```
+
+```{r}
+triA <- A |>
+  spread(key = "V2", value = "V3") |>
+  dplyr::select(-V1)
+
+tA = t(triA)
+triA[upper.tri(triA)] <- tA[upper.tri(tA)]
+```
+
+```{r}
+phenotypes = fread(file.path(base_folder, "data/pheno.dat"))
+vec <- ped$dog_id %in% phenotypes$id
+fullA <- as.matrix(triA[vec,vec])
+colnames(fullA) <- phenotypes$dog_id
+rownames(fullA) <- phenotypes$dog_id
+```
+
+```{r}
+heatmap(fullA)
+```
+
+Finally, the `pedigree` package gives us a convenient function to calculate the inbreeding for all animals in our pedigree (or a subset thereof):
+
+```{r}
+F_values = calcInbreeding(ped)
+kable(F_values)
+```
