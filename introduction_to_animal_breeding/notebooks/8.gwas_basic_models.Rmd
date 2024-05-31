@@ -18,6 +18,7 @@ library("sommer")
 library("rrBLUP")
 library("ggplot2")
 library("tidyverse")
+library("factoextra")
 library("data.table")
 
 knitr::opts_chunk$set(echo = FALSE)
@@ -93,7 +94,7 @@ print(g)
 ### ANOVA table
 
 ```{r echo=TRUE}
-kable(anova(fit))
+anova(fit)
 ```
 
 ### Add population structure
@@ -118,11 +119,11 @@ Xscaled = scale(X, center = TRUE, scale = TRUE)
 
 ## uncomment if you want to recalculate PCs from SNP data
 ## (this may take a while)
-# res <- prcomp(X, rank. = 3)
+res <- prcomp(X, rank. = 3)
 
 ## we can load precomputed PCs from the RData object in /data
-load("../data/pca.RData")
-names(res)
+# load("../data/pca.RData")
+# names(res)
 
 npcs = length(res$sdev)
 print(paste("QUESTION: The total number of PCs is", npcs, ": can you guess why?"))
@@ -144,14 +145,15 @@ sum(variance[c(1:3)])
 ```
 
 ```{r echo=TRUE}
-library("factoextra")
+#library("factoextra")
 fviz_eig(res, ncp = 25)
 ```
 
 #### Use principal components to model population structure
 
 ```{r}
-head(res$x[,c(1,2,3,123,124,125)])
+head(res$x[,c(1,2,3)])
+
 ## we use the first 3 PCs
 df <- cbind.data.frame(df,res$x[,c(1:3)])
 ```
@@ -254,7 +256,6 @@ model1_x <- rrBLUP::GWAS(
    plot = FALSE
 )
 ```
-
 
 ```{r}
 # model1_x <- sommer::GWAS(
