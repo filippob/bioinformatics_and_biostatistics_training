@@ -2,7 +2,7 @@ Physalia workshop on Deep Learning for Life Sciences
 =======================
 
 - slides
-- worked out notebooks with exercises (Python)
+- worked out [notebooks with exercises](notebooks/) (Python)
 
 ### Programme
 
