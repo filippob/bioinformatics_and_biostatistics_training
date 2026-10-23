@@ -16,6 +16,23 @@ Physalia workshop on Deep Learning for Life Sciences
 - Notebooks on dense neural networks for classification
 - Exercise on DNN for classification
 
+#### Day 3
+- Convolutional Neural Networks (CNN)
+- Cross-validation and model selection
+- Practical cross-validation and convolutions
+
+#### Day 4
+- Data augmentation
+- “Bayesian” learning (pill)
+- Underfitting, overfitting, recipe for a good project
+
+#### Day 5
+- Transfer learning
+- Embeddings, self-attention, transformers: a primer
+- A gentle introduction to LLMs 
+
+
+
 
 
 
