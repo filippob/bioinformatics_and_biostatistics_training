@@ -1,7 +1,5 @@
 ## Introduction to Deep Learning  @INSERM
 
----
-
 - [slides](slides/) (lectures and pills)
 - worked out [notebooks with exercises](notebooks/) (Python)
 
